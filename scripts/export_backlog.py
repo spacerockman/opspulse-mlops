@@ -24,7 +24,7 @@ def load_tasks() -> list[dict]:
 
 def render_markdown(tasks: list[dict]) -> str:
     lines: list[str] = [
-        "# 03. Sprint バックログ＆タスク詳細台帳（全 22 チケット）",
+        "# 03. Sprint バックログ＆タスク詳細台帳（全 24 チケット）",
         "",
         "> **Single Source of Truth**: 本ファイルは `docs/backlog_tasks.json` から "
         "`python scripts/export_backlog.py` により自動生成されています。",
@@ -40,7 +40,7 @@ def render_markdown(tasks: list[dict]) -> str:
         "  ```",
         "- **Jira Cloud (Free) を使う場合**:",
         "  Jira プロジェクト設定 → **System → External System Import → CSV** から "
-        "`docs/jira_backlog_import.csv` をそのまま取り込むと、全 22 チケットが一括作成されます。",
+        "`docs/jira_backlog_import.csv` をそのまま取り込むと、全 24 チケットが一括作成されます。",
         "",
         "---",
         "",

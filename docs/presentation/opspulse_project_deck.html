@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpsPulse MLOps — 项目立项与实施介绍 Deck</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --surface: #111827;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent2: #818cf8;
+      --green: #34d399;
+      --amber: #fbbf24;
+      --red: #f87171;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans CJK JP", "Microsoft YaHei", "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .deck {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 40px;
+    }
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1180px;
+      height: 100%;
+      max-height: 690px;
+      background: linear-gradient(145deg, #0f172a 0%, #111827 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 40px 48px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+    }
+    .slide.active { display: flex; }
+    .tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+    h1 { font-size: 40px; line-height: 1.2; margin-bottom: 14px; }
+    h2 { font-size: 28px; line-height: 1.25; margin-bottom: 18px; color: #f1f5f9; }
+    h3 { font-size: 17px; margin-bottom: 8px; color: var(--accent); }
+    p, li { font-size: 15px; line-height: 1.6; color: #cbd5e1; }
+    .subtitle { font-size: 19px; color: var(--muted); max-width: 820px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .card {
+      background: rgba(30, 41, 59, 0.72);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .card.highlight { border-color: rgba(56, 189, 248, 0.55); background: rgba(14, 116, 144, 0.16); }
+    .card.warn { border-color: rgba(248, 113, 113, 0.45); background: rgba(127, 29, 29, 0.16); }
+    .card.good { border-color: rgba(52, 211, 153, 0.45); background: rgba(6, 78, 59, 0.18); }
+    .kpi { font-size: 30px; font-weight: 800; color: var(--accent); margin: 4px 0; }
+    .kpi.red { color: var(--red); }
+    .kpi.green { color: var(--green); }
+    .kpi.amber { color: var(--amber); }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border: 1px solid var(--border); padding: 9px 12px; text-align: left; }
+    th { background: rgba(56, 189, 248, 0.12); color: var(--accent); font-weight: 700; }
+    tr:nth-child(even) td { background: rgba(15, 23, 42, 0.45); }
+    .arch-flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      align-items: stretch;
+      margin: 12px 0;
+    }
+    .arch-box {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 14px 12px;
+    }
+    .arch-box h4 { font-size: 14px; color: #f8fafc; margin-bottom: 8px; }
+    .arch-box p { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12.5px;
+      color: var(--muted);
+      border-top: 1px solid rgba(51,65,85,0.6);
+      padding-top: 12px;
+      margin-top: 16px;
+    }
+    .controls {
+      height: 54px;
+      background: #090e1a;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 0 24px;
+    }
+    button {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 7px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+    button:hover { border-color: var(--accent); color: var(--accent); }
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(129, 140, 248, 0.18);
+      color: #c7d2fe;
+    }
+    @media print {
+      body { height: auto; overflow: visible; background: #fff; color: #111; }
+      .controls { display: none; }
+      .deck { display: block; padding: 0; }
+      .slide {
+        display: flex !important;
+        page-break-after: always;
+        max-height: none;
+        height: 94vh;
+        box-shadow: none;
+        background: #fff;
+        color: #111;
+        border: 1px solid #cbd5e1;
+      }
+      h2, p, li, td, th { color: #111 !important; }
+      .card, .arch-box { background: #f8fafc !important; border-color: #cbd5e1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck">
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide active">
+      <div>
+        <span class="tag">Project Kickoff Deck · 日本向け準本番 MLOps / LLMOps 案件</span>
+        <h1>OpsPulse MLOps</h1>
+        <p class="subtitle">
+          面向日本 B2B SaaS 企业运维场景的 <strong>AI 异常检测、自动化生命周期管理与故障一次定界平台</strong>
+        </p>
+      </div>
+      <div class="grid-3">
+        <div class="card highlight">
+          <h3>项目定位</h3>
+          <p>不是“训练一个 Demo 模型”，而是加入一家已运行 <strong>v0.1 静态规则</strong> 的 SaaS 团队，在 8 周内将其改造为准生产级 MLOps + LLMOps 平台。</p>
+        </div>
+        <div class="card">
+          <h3>双人协作职责</h3>
+          <p><strong>成员 A (jintao)</strong>：Infra / AWS / Docker / CI-CD / 监控与回滚<br/>
+             <strong>成员 B (xinchen)</strong>：特征契约 / ML / MLflow / Drift / RAG Agent</p>
+        </div>
+        <div class="card good">
+          <h3>最终求职价值</h3>
+          <p>产出 5 份真实压测与演练证据 + 日语设计书/运用手顺书 + 24 张 GitHub 工单轨迹，直接写入日文《職務経歴書》。</p>
+        </div>
+      </div>
+      <div class="footer">
+        <span>OpsPulse MLOps Team · Tech Lead Kickoff</span>
+        <span>Slide 1 / 10 (使用 ← / → 键翻页，Cmd+P 可导出 PDF)</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: CLIENT PAIN POINTS -->
+    <section class="slide">
+      <div>
+        <span class="tag">01 · 客户现状与痛点（为什么需要这个项目）</span>
+        <h2>客户要解决什么问题？（现有 v0.1 系统的三大痛点）</h2>
+        <div class="grid-3">
+          <div class="card warn">
+            <h3>痛点 1：狼来了误报疲劳</h3>
+            <div class="kpi red">72% 误报</div>
+            <p>促销/业务高峰期 CPU 涨到 87%，但延迟和错误率完全健康。现行 <code>CPU &gt; 85%</code> 静态阈值疯狂告警（v0.1 实测整体误报率 <strong>36%</strong>）。</p>
+          </div>
+          <div class="card warn">
+            <h3>痛点 2：缓慢故障漏报</h3>
+            <div class="kpi red">0% 召回</div>
+            <p>缓慢内存泄漏在 OOMKill 崩溃前 CPU 与 5xx 尚未超标，v0.1 静态规则实测早期召回率为 <strong>0/200 (0%)</strong>，只能等服务宕机后被动救火。</p>
+          </div>
+          <div class="card warn">
+            <h3>痛点 3：模型失控 &amp; MTTR 长</h3>
+            <div class="kpi amber">人工救火</div>
+            <p>团队不敢上线 ML 模型（无门禁、无漂移监控、无回滚手段）；告警响后 SRE 需手动翻查日志和日语 Runbook，恢复耗时极长。</p>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <h3>客户核心诉求一句话总结</h3>
+        <p>「我要一套<strong>比规则更准（少误报、不漏报）</strong>、<strong>上线有门禁</strong>、<strong>出事 3 分钟内能回滚</strong>、<strong>分布变了能提醒我审批再重训</strong>，并且<strong>告警时自动把日语排查手顺书和命令递给值班人员</strong>的轻量省钱平台。」</p>
+      </div>
+      <div class="footer">
+        <span>客户视角：日本 B2B SaaS 情シス / SRE 部门</span>
+        <span>Slide 2 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: CLIENT KPIs -->
+    <section class="slide">
+      <div>
+        <span class="tag">02 · 客户验收标准（Acceptance KPIs）</span>
+        <h2>客户要什么？—— 可量化的硬性验收指标</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>评估维度</th>
+              <th>v0.1 现状（实测）</th>
+              <th>客户验收目标（SLO / KPI）</th>
+              <th>验证依据</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>误报率（FPR）</strong></td>
+              <td>36.0%（大促场景 72%）</td>
+              <td>相对现行规则下降 <strong>&gt;= 50%</strong>（目标 &lt;= 5%）</td>
+              <td><code>01_model_vs_baseline.md</code></td>
+            </tr>
+            <tr>
+              <td><strong>内存泄漏早期召回</strong></td>
+              <td>0.0%（0/200）</td>
+              <td>Recall <strong>&gt;= 85%</strong></td>
+              <td>MLflow 对比评估指标</td>
+            </tr>
+            <tr>
+              <td><strong>在线推理 P95 延迟</strong></td>
+              <td>本地规则基线</td>
+              <td>50 并发下 <strong>P95 &lt; 50ms</strong>、错误率 0%</td>
+              <td><code>02_load_test.md</code></td>
+            </tr>
+            <tr>
+              <td><strong>训练-推论特征一致性</strong></td>
+              <td>人工易出错</td>
+              <td>数值偏差 <strong>&lt; 1e-6</strong>（CI 每次 PR 强制阻断）</td>
+              <td><code>test_train_serving_consistency.py</code></td>
+            </tr>
+            <tr>
+              <td><strong>坏模型回滚时间 (RTO)</strong></td>
+              <td>无回滚机制</td>
+              <td>从触发到切回上一版 @champion <strong>&lt; 3 分钟</strong></td>
+              <td><code>03_drift_and_rollback.md</code></td>
+            </tr>
+            <tr>
+              <td><strong>AI 故障分析准确度</strong></td>
+              <td>纯人工翻手册</td>
+              <td>Runbook 引用命中率 <strong>&gt;= 90%</strong>、零幻觉命令</td>
+              <td><code>04_agent_eval.md</code> + Langfuse</td>
+            </tr>
+            <tr>
+              <td><strong>云端演练预算</strong></td>
+              <td>—</td>
+              <td>AWS 东京区实操演练总成本 <strong>&lt; $20</strong>（用完即毁）</td>
+              <td>Terraform 无 NAT 省钱架构</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="footer">
+        <span>拒绝空口画饼，所有 KPI 必须有可复现证据落盘</span>
+        <span>Slide 3 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: WHAT WE BUILD -->
+    <section class="slide">
+      <div>
+        <span class="tag">03 · 我方交付蓝图（我们要做什么）</span>
+        <h2>我们要建造的 5 大核心子系统</h2>
+        <div class="grid-2">
+          <div class="card highlight">
+            <h3>1. 数据采集与同构存储（Member A）</h3>
+            <ul>
+              <li>Docker Compose 补齐 <strong>Postgres + MinIO + MLflow</strong>。</li>
+              <li>ETL 定时采集 <code>target_app</code> 指标与标签写入 Parquet。</li>
+              <li>补齐预测审计落盘与 <code>/admin/logs</code> 错误日志接口。</li>
+            </ul>
+          </div>
+          <div class="card highlight">
+            <h3>2. 共享特征与模型生命周期（Member B）</h3>
+            <ul>
+              <li><code>opspulse_core</code> + Pandera 数据契约防 Train-Serving Skew。</li>
+              <li>Static vs IsolationForest vs LightGBM 对比实验入 MLflow。</li>
+              <li>质量门禁自动打标 <code>@challenger</code> → 晋升 <code>@champion</code>。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>3. 云端容器部署与观测（Member A）</h3>
+            <ul>
+              <li>多阶段安全 Docker 镜像 + GitHub Actions CI/CD。</li>
+              <li>Terraform 一键拉起 AWS ECS Fargate（省钱无 NAT）。</li>
+              <li>Grafana 监控大盘 + 一键切回旧版 <code>rollback_model.py</code>。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>4. 漂移监控与 AI 故障定界（Member B + Both）</h3>
+            <ul>
+              <li>Evidently 监测数据/预测漂移 → 发 Issue → 人工审批再训练。</li>
+              <li>RAG 检索日语 Runbook (RB-001~004) 输出一次分析报告。</li>
+              <li>Langfuse Cloud 全链路追踪 + 20 条评测集量化质量。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span>当前进展：v0.1 PoC 基线已交付运行，LAN 开发机（192.168.0.253）已就绪</span>
+        <span>Slide 4 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: ARCHITECTURE -->
+    <section class="slide">
+      <div>
+        <span class="tag">04 · 系统架构图（End-to-End Architecture）</span>
+        <h2>从数据生成到 AI 自愈分析的完整 MLOps 闭环</h2>
+        <div class="arch-flow">
+          <div class="arch-box">
+            <h4>1. 业务模拟系统</h4>
+            <p><strong>target_app (v0.1 済)</strong><br/>FastAPI 订单服务<br/>/metrics + JSON Logs<br/>5 种故障/漂移注入</p>
+          </div>
+          <div class="arch-box">
+            <h4>2. 采集与存储</h4>
+            <p><strong>ETL + S3/MinIO</strong><br/>Prometheus 拉取<br/>Pydantic/Pandera 校验<br/>Parquet 分区落盘</p>
+          </div>
+          <div class="arch-box">
+            <h4>3. 训练与门禁</h4>
+            <p><strong>LightGBM + MLflow</strong><br/>opspulse_core 共享特征<br/>质量门禁自动拦截<br/>@challenger → @champion</p>
+          </div>
+          <div class="arch-box">
+            <h4>4. 推论与运维</h4>
+            <p><strong>ECS Fargate + Grafana</strong><br/>FastAPI 加载 @champion<br/>Evidently 漂移监测<br/>HITL 审批再训练 &amp; 回滚</p>
+          </div>
+          <div class="arch-box">
+            <h4>5. AI 故障分析</h4>
+            <p><strong>RAG + Langfuse</strong><br/>检索日语 Runbook<br/>指标+日志根因分析<br/>Trace &amp; 幻觉率评估</p>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-top:16px;">
+          <div class="card good">
+            <h3>核心工程原则 #1：Local-Cloud Parity</h3>
+            <p>本地用 MinIO 模拟 S3、Docker 模拟 ECS，仅通过环境变量切换，避免“本地好好的上云全崩”。</p>
+          </div>
+          <div class="card good">
+            <h3>核心工程原则 #2：Human-in-the-Loop</h3>
+            <p>漂移检测到不盲目自动覆盖线上模型，而是建 Issue 附报告 → 工程师点 Approve 后再训练晋升。</p>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span>架构详细设计见 docs/01_architecture.md &amp; ADR-001/002</span>
+        <span>Slide 5 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: TECH STACK & TRADEOFFS -->
+    <section class="slide">
+      <div>
+        <span class="tag">05 · 技术选型与取舍理由（日本面试高频考点）</span>
+        <h2>为什么选这套技术栈？（而非盲目堆大厂全家桶）</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>模块</th>
+              <th>选定技术</th>
+              <th>不选替代方案的理由（Engineering Trade-off）</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>模型</strong></td>
+              <td>LightGBM + IsolationForest</td>
+              <td>不选 PyTorch/LSTM：表格时序指标 10ms 内 CPU 可训可推，且可解释性强（Top-3 贡献特征）。</td>
+            </tr>
+            <tr>
+              <td><strong>模型注册</strong></td>
+              <td>MLflow Aliases (<code>@champion</code>)</td>
+              <td>不用已废弃的 <code>Stages</code> API，紧跟 MLflow 2.x+ 最新标准。</td>
+            </tr>
+            <tr>
+              <td><strong>云平台</strong></td>
+              <td>AWS ECS Fargate + Terraform</td>
+              <td>不选 EKS/Kubeflow/SageMaker：小团队上 K8s 运维与控制面成本（$73+/月）喧宾夺主。</td>
+            </tr>
+            <tr>
+              <td><strong>网络控费</strong></td>
+              <td>公有子网 + 严格 SG（无 NAT）</td>
+              <td>省去 NAT Gateway 固定月租（约 $32/月），将 AWS 演练费用压到一杯咖啡钱。</td>
+            </tr>
+            <tr>
+              <td><strong>LLMOps</strong></td>
+              <td>Langfuse Cloud (免费层)</td>
+              <td>不在本地 Docker 自建 Langfuse v3（需 ClickHouse+Redis 极重），零运维专注评估本身。</td>
+            </tr>
+            <tr>
+              <td><strong>数据替代</strong></td>
+              <td>自建 SaaS 模拟器 + AI4I 扩展</td>
+              <td>不用静态 Loghub 孤立日志，确保指标/日志/漂移/线上推理端到端全链路打通。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="footer">
+        <span>技术选型 ADR 已记录在 docs/02_adr/，可直接用于日语面试架构答辩</span>
+        <span>Slide 6 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: TEAM DIVISION -->
+    <section class="slide">
+      <div>
+        <span class="tag">06 · 团队分工与工程纪律</span>
+        <h2>双人职责清晰切分（写进各自简历不撞车）</h2>
+        <div class="grid-2">
+          <div class="card highlight">
+            <h3>成员 A（jintao）— Platform / MLOps 担当</h3>
+            <p><span class="pill">目标岗位</span> MLOps Engineer / AI Platform / SRE</p>
+            <ul style="margin-top:10px;">
+              <li>本地 MinIO / Postgres / MLflow 容器底座（#1）</li>
+              <li>ETL Parquet 数据收集与数据集生成（#2, #3）</li>
+              <li>推理日志落盘、容器瘦身与性能压测（#7, #12, #13）</li>
+              <li>GitHub Actions CI/CD 与安全审计（#8, #21）</li>
+              <li>Terraform AWS 部署、Grafana 与一键回滚（#14, #15, #16）</li>
+            </ul>
+          </div>
+          <div class="card highlight">
+            <h3>成员 B（xinchen）— ML / LLMOps 担当</h3>
+            <p><span class="pill">目标岗位</span> ML Engineer / LLMOps / AI Engineer</p>
+            <ul style="margin-top:10px;">
+              <li><code>opspulse_core</code> Pandera 契约与共享特征工程（#4）</li>
+              <li>多模型对比训练与基线实验报告（#5, #6）</li>
+              <li>MLflow 质量门禁与 <code>@champion</code> 在线推理（#9, #10）</li>
+              <li>Train-Serving 一致性 CI 测试（#11）</li>
+              <li>Evidently 漂移监控与 HITL 联调（#17, #18）</li>
+              <li>日语 Runbook RAG Agent + Langfuse 评估（#19, #20）</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px;">
+          <h3>团队 5 条铁律</h3>
+          <p>① 任何 AI 生成代码必须自己验证并能 3 句话讲清原理　② 两人独立目录开发，严禁共用工作目录　③ 所有修改走 GitHub PR（&lt;300行）+ 相互 Review + CI 绿灯合并　④ 特征只能写在 <code>opspulse_core</code>　⑤ AWS 资源严禁手点控制台，全部 Terraform 一键启停。</p>
+        </div>
+      </div>
+      <div class="footer">
+        <span>总工单：24 张 GitHub Issues（Sprint 0–4），看板追踪进度</span>
+        <span>Slide 7 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: 8-WEEK ROADMAP -->
+    <section class="slide">
+      <div>
+        <span class="tag">07 · 8 周实施节奏（Sprint 0–4 里程碑）</span>
+        <h2>分阶段推进计划与每周验收标准</h2>
+        <div class="grid-4" style="margin-top:8px;">
+          <div class="card">
+            <h3>Sprint 1 (W1-2)</h3>
+            <p><strong>数据与首个 ML 模型</strong></p>
+            <ul style="margin-top:8px; font-size:13.5px;">
+              <li>MinIO + Postgres + MLflow 上线</li>
+              <li>生成 3,000+ 带标签样本</li>
+              <li>Pandera 契约与特征</li>
+              <li>LightGBM 打败静态基线</li>
+              <li><strong>产出</strong>：证据报告 #1</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Sprint 2 (W3-4)</h3>
+            <p><strong>核心 MLOps 闭环</strong></p>
+            <ul style="margin-top:8px; font-size:13.5px;">
+              <li>质量门禁自动晋升</li>
+              <li>API 切换 <code>@champion</code></li>
+              <li>预测落盘与日志接口</li>
+              <li>GitHub Actions CI + 压测</li>
+              <li><strong>产出</strong>：证据报告 #2</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Sprint 3 (W5-6)</h3>
+            <p><strong>上云、监控与回滚</strong></p>
+            <ul style="margin-top:8px; font-size:13.5px;">
+              <li>Terraform 拉起 AWS ECS</li>
+              <li>Grafana 实时大盘</li>
+              <li>Evidently 漂移监控</li>
+              <li>HITL 重训 + 3分钟回滚</li>
+              <li><strong>产出</strong>：证据报告 #3</li>
+            </ul>
+          </div>
+          <div class="card good">
+            <h3>Sprint 4 (W7-8)</h3>
+            <p><strong>LLMOps 与企业验收</strong></p>
+            <ul style="margin-top:8px; font-size:13.5px;">
+              <li>日语 RAG Triage Agent</li>
+              <li>Langfuse 20条评测集</li>
+              <li>密钥/IAM 安全检查</li>
+              <li>7天稳态跑测 + 日语手册</li>
+              <li><strong>产出</strong>：证据报告 #4 &amp; #5</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px;">
+          <h3>当前已完成起点（v0.1 PoC 已跑通）</h3>
+          <p><code>target_app</code> + <code>inference_api</code> + <code>prometheus</code> 3 容器已在本机 Docker 运行健康；<code>fault_injector.py</code> 与 <code>evaluate_baseline.py</code> 已实测复现静态规则缺陷（FPR 36%、内存泄漏 Recall 0%）。</p>
+        </div>
+      </div>
+      <div class="footer">
+        <span>每周日晚 30 分钟 Sprint Demo：只看真实运行环境与终端输出</span>
+        <span>Slide 8 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 9: RISK & COST -->
+    <section class="slide">
+      <div>
+        <span class="tag">08 · 风险控制与质量防线</span>
+        <h2>新人实战最容易踩的 4 个坑 &amp; 我们的防线</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3>坑 1：Vibe Coding 写完自己不懂</h3>
+            <p><strong>防线</strong>：PR 模板强制贴实测命令与输出；每周 Demo 现场问答原理；Tech Lead 逐 PR Review 架构边界。</p>
+          </div>
+          <div class="card">
+            <h3>坑 2：训练准确率 99%，线上全崩</h3>
+            <p><strong>防线</strong>：训练与推论强制共用 <code>packages/opspulse_core/</code>，CI 跑 <code>test_train_serving_consistency.py</code>（偏差 &lt; 1e-6）。</p>
+          </div>
+          <div class="card">
+            <h3>坑 3：AWS 忘记关机被扣巨额账单</h3>
+            <p><strong>防线</strong>：日常 95% 开发/7天跑测全在 46G 局域网 Linux；AWS 阶段无 NAT/RDS，演练完立刻 <code>make aws-down</code> 销毁。</p>
+          </div>
+          <div class="card">
+            <h3>坑 4：AI Agent 瞎编高危运维命令</h3>
+            <p><strong>防线</strong>：RAG 严格约束引用日语 Runbook 原文，缺证据强制拒答，Langfuse 评测集把关幻觉率。</p>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span>工程素养 = 提前把最容易翻车的地方写进自动化门禁</span>
+        <span>Slide 9 / 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 10: RESUME & NEXT STEP -->
+    <section class="slide">
+      <div>
+        <span class="tag">09 · 最终简历包装与今日开工指令</span>
+        <h2>项目结束时，你们能写进日文《職務経歴書》的成果</h2>
+        <div class="grid-2">
+          <div class="card good">
+            <h3>成员 A 简历亮点（MLOps / Platform）</h3>
+            <ul style="font-size:13.5px;">
+              <li>AWS ECS Fargate・ECR・S3・Terraform を用いた低コスト機械学習推論基盤の設計・構築</li>
+              <li>GitHub Actions による CI/CD（一貫性テスト・コンテナビルド・自動デプロイ）および HITL 再学習フロー実装</li>
+              <li>Prometheus・Grafana 監視基盤構築と、RTO 3分以内のモデルロールバック機構実装</li>
+            </ul>
+          </div>
+          <div class="card good">
+            <h3>成员 B 简历亮点（ML / LLMOps）</h3>
+            <ul style="font-size:13.5px;">
+              <li>共有特徴量パッケージ・Pandera 契約による Train-Serving Skew 防止と異常検知モデル開発（誤報率 〇〇% 削減）</li>
+              <li>MLflow Model Registry（Aliases）品質ゲートと Evidently ドリフト検知パイプライン構築</li>
+              <li>日本語 Runbook RAG と Langfuse 評価を組み込んだ SRE 障害一次分析 AI Agent 開発</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card highlight" style="margin-top:16px;">
+          <h3>今日立即执行的 3 步（Issue #0）</h3>
+          <p>1. 推代码上 GitHub 并运行 <code>bootstrap_github_board.py</code> 激活 24 张在线任务卡 → 2. 成员 B 用 <code>xinchen</code> 独立克隆仓库 → 3. 成员 A 领 <strong>#1</strong>，成员 B 领 <strong>#4</strong>，正式启动 Sprint 1！</p>
+        </div>
+      </div>
+      <div class="footer">
+        <span>注意：简历上注明「個人／共同開発プロジェクト」，数字严格填写真实实测值</span>
+        <span>Slide 10 / 10</span>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="controls">
+    <button onclick="prevSlide()">← 上一页</button>
+    <span id="counter" style="font-size:14px; color:#94a3b8;">1 / 10</span>
+    <button onclick="nextSlide()">下一页 →</button>
+    <button onclick="window.print()">打印 / 导出 PDF</button>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let idx = 0;
+    function show(i) {
+      idx = Math.max(0, Math.min(slides.length - 1, i));
+      slides.forEach((s, n) => s.classList.toggle('active', n === idx));
+      document.getElementById('counter').textContent = `${idx + 1} / ${slides.length}`;
+    }
+    function nextSlide() { show(idx + 1); }
+    function prevSlide() { show(idx - 1); }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+  </script>
+</body>
+</html>

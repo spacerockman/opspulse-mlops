@@ -1,0 +1,12 @@
+Req ID,类别,客户痛点/需求（客户要什么）,客户期望指标（Acceptance KPI）,我方交付方案（我们要做什么）,负责角色,所属Sprint,关联Issue,交付产物/验证方式
+REQ-01,业务痛点-误报抑制,解决营销活动/正常流量高峰时静态规则（CPU>85%）频繁误报的问题（オオカミ少年アラート）,误报率（FPR）相对现行规则降低 >= 50%,使用共享特征（rps_per_cpu 等）训练 LightGBM/IF 模型区分正常高负载与真故障,Member B,Sprint 1,#4 #5 #6,MLflow 对比实验 + docs/evidence/01_model_vs_baseline.md
+REQ-02,业务痛点-慢故障预警,解决缓慢内存泄漏在 OOMKill 前无法被静态阈值提前发现的问题,memory_leak 场景早期召回率 Recall >= 85%（现行基线为 0%）,引入内存增长斜率特征（memory_slope_per_min）与时序滑动采样训练,Member A / B,Sprint 1,#2 #3 #4 #5,ETL 采集 + 特征工程 + offline benchmark 实测
+REQ-03,数据治理与一致,确保训练与线上推论计算同一套特征，杜绝上线后精度莫名崩塌,训练-推论特征数值偏差 < 1e-6；脏数据拦截率 100%,构建共享包 opspulse_core + Pandera 数据契约 + CI 自动化一致性校验,Member B / A,Sprint 1-2,#4 #8 #11,tests/test_train_serving_consistency.py + GitHub CI
+REQ-04,低延迟线上推理,推论服务需高可靠容器化部署，满足微服务实时调用延迟要求,API P95 延迟 < 50ms，50 并发零错误，镜像安全非 root 运行,多阶段瘦身 Docker + FastAPI + /ready 探针 + 并发压测验证,Member A / B,Sprint 2,#7 #10 #13,scripts/load_test.py + docs/evidence/02_load_test.md
+REQ-05,模型生命周期门禁,防止未经验证的低质量模型直接上线污染生产环境,所有候选模型必须通过自动化 Quality Gate 才可晋升 @champion,MLflow Model Registry + Aliases（@challenger/@champion）+ 门禁阻断脚本,Member B,Sprint 2,#9,pipelines/training/quality_gate.py + 单测
+REQ-06,云端弹性部署与控费,推理底座需运行在真实 AWS 云环境且符合日本企业规范与个人控费要求,Terraform 一键拉起/销毁 AWS ECS Fargate；演练月费 < $20,采用无 NAT Gateway 的省钱版 Terraform（S3/ECR/IAM/ECS）+ GitHub Actions CD,Member A,Sprint 3,#14 #15,infra/terraform/ + .github/workflows/cd-ecs.yml
+REQ-07,线上漂移监控与再训练,业务流量结构变化时系统需自动感知模型退化，且再训练必须有人类审批把关,Evidently 自动生成漂移报告并建 Issue；人类 Approve 后自动重训上线,预测审计落盘 + Evidently Drift Monitor + GitHub Environment 人工审批流,Member A / B,Sprint 2-3,#12 #17 #18,docs/evidence/03_drift_and_rollback.md
+REQ-08,生产故障快速回滚,一旦上线坏模型导致误报暴增，运维需能在极短时间内安全回滚,回滚 RTO < 3 分钟，且每次回滚需留存审计记录,一键回滚脚本 rollback_model.py + /admin/reload-model 热切回上一版 @champion,Member A,Sprint 3,#16 #18,scripts/rollback_model.py + 回滚演练时间线记录
+REQ-09,AI 辅助故障定位,值班 SRE 收到告警时能立刻获得基于企业日语运维手册的根因分析与排查命令,Runbook 引用命中率 >= 90%，无依据时拒答（零幻觉命令）,基于 RB-001~004 的 RAG Triage Agent + Langfuse Cloud 全链路追踪与离线评估,Member B,Sprint 4,#19 #20,docs/evidence/04_agent_eval.md + Langfuse Trace
+REQ-10,安全与企业交付物,满足日本 IT/SIer 交付标准：零密钥泄露、最小 IAM 权限、日语运用手顺书与可复现证据,0 密钥泄露；完整日语《基本設計書》《運用手順書》与 7 天稳态验证,gitleaks/tfsec 扫描 + 联动压测 soak_runner + 日语交付文档与面试包装,Member A / Both,Sprint 4,#21 #22,docs/03_runbook_ops.md + docs/evidence/05_soak_and_final_acceptance.md
+REQ-11,平台跨场景扩展(可选),验证这套 MLOps 底座不限于 IT 运维，还可低成本复用到其他日本行业,复用同一套 MLflow + 门禁注册第二个制造业予知保全模型,接入 UCI AI4I 2020 合成设备数据跑通训练与注册,Both,Sprint 4,#23,docs/evidence/06_platform_reusability.md
