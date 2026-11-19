@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: "target-app"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ["target-app:8001"]
+        labels:
+          service: "order-service"
+          env: "local"
+
+  - job_name: "inference-api"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ["inference-api:8002"]
+        labels:
+          service: "opspulse-inference"
+          env: "local"
+
+# TODO(Sprint 3, Member A, Issue #14):
+# Add alert_rules.yml for high anomaly rate, high inference latency (P95 > 100ms),
+# and target_app service down alerts.

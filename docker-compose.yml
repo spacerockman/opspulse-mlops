@@ -1,0 +1,74 @@
+# ==============================================================================
+# OpsPulse MLOps — Local Development Stack (v0.1 PoC Baseline)
+# ==============================================================================
+# Current v0.1 services:
+#   - target-app     : Simulated Japanese B2B SaaS order-service (:8001)
+#   - inference-api  : Legacy static-threshold anomaly detector (:8002)
+#   - prometheus     : Metrics scraper (:9090)
+#
+# TODO(Sprint 1, Member A, Issue #1):
+#   Add PostgreSQL, MinIO (+ bucket init), MLflow Tracking Server, and Grafana
+#   to establish full local-cloud parity before AWS deployment in Sprint 3.
+# ==============================================================================
+
+services:
+  target-app:
+    build:
+      context: .
+      dockerfile: services/target_app/Dockerfile
+    container_name: opspulse-target-app
+    ports:
+      - "8001:8001"
+    environment:
+      - APP_ENV=local
+      - LOG_LEVEL=INFO
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  inference-api:
+    build:
+      context: .
+      dockerfile: services/inference_api/Dockerfile
+    container_name: opspulse-inference-api
+    ports:
+      - "8002:8002"
+    environment:
+      - APP_ENV=local
+      - DETECTOR_BACKEND=${DETECTOR_BACKEND:-static_threshold}
+      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI:-http://mlflow:5000}
+      - MLFLOW_MODEL_NAME=${MLFLOW_MODEL_NAME:-opspulse-anomaly-detector}
+      - MLFLOW_MODEL_ALIAS=${MLFLOW_MODEL_ALIAS:-champion}
+    depends_on:
+      target-app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: opspulse-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=7d"
+    depends_on:
+      - target-app
+      - inference-api
+
+  # ----------------------------------------------------------------------------
+  # TODO(Sprint 1, Member A, Issue #1):
+  # Uncomment and complete the services below in your Sprint 1 PR:
+  #   - postgres (backend store for MLflow + metadata)
+  #   - minio (S3-compatible object store for Parquet datasets + MLflow artifacts)
+  #   - mlflow (Model Registry + Experiment Tracking on :5000)
+  #   - grafana (Dashboards on :3000 — can be added in Sprint 1 or Sprint 3)
+  # ----------------------------------------------------------------------------

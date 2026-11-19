@@ -1,0 +1,359 @@
+# 03. Sprint バックログ＆タスク詳細台帳（全 22 チケット）
+
+> **Single Source of Truth**: 本ファイルは `docs/backlog_tasks.json` から `python scripts/export_backlog.py` により自動生成されています。
+> オンライン管理ツール（**GitHub Projects + Issues** 推奨、または **Jira Cloud Free**）へそのまま一括登録できます。
+
+## 一括インポート手順
+- **GitHub Issues / Projects を使う場合（推奨）**:
+  ```bash
+  export GITHUB_TOKEN=ghp_xxx
+  python scripts/bootstrap_github_board.py --repo <owner>/opspulse-mlops --member-a <gh_user_a> --member-b <gh_user_b>
+  ```
+- **Jira Cloud (Free) を使う場合**:
+  Jira プロジェクト設定 → **System → External System Import → CSV** から `docs/jira_backlog_import.csv` をそのまま取り込むと、全 22 チケットが一括作成されます。
+
+---
+
+## 全体アサイン早見表（各自の担当を確認してピックアップ）
+
+| ID | Sprint | Owner | Reviewer | 工数 | 依存 | タスク名 |
+| :---: | :--- | :--- | :--- | :---: | :--- | :--- |
+| **#0** | Sprint 0 (Week 0) | `Both` | `Tech Lead` | 2h | - | [S0][Joint] 初始化 GitHub 仓库、分支保护与在线看板，跑通 v0.1 缺陷复现 |
+| **#1** | Sprint 1 (Week 1-2) | `Member A` | `Member B` | 4h | #0 | [S1][A] 扩展 Docker Compose：接入 PostgreSQL + MinIO（自动建桶）+ MLflow Server |
+| **#2** | Sprint 1 (Week 1-2) | `Member A` | `Member B` | 5h | #1 | [S1][A] 开发 ETL 采集器：抽取 target_app 指标并写 Parquet 到 MinIO/S3 |
+| **#3** | Sprint 1 (Week 1-2) | `Member A` | `Member B` | 3h | #2 | [S1][A] 制作可复现数据集生成命令 `make data-collect`（>=3,000 条 5 场景混合样本） |
+| **#4** | Sprint 1 (Week 1-2) | `Member B` | `Member A` | 4h | #0 | [S1][B] 完善 `opspulse_core`：接入 Pandera 批处理数据契约与高区分度特征 |
+| **#5** | Sprint 1 (Week 1-2) | `Member B` | `Member A` | 6h | #1, #3, #4 | [S1][B] 搭建训练对比流水线：`Static` vs `IsolationForest` vs `LightGBM` 接入 MLflow |
+| **#6** | Sprint 1 (Week 1-2) | `Member B` | `Member A` | 2h | #5 | [S1][B] 产出证据报告 #1：`docs/evidence/01_model_vs_baseline.md` |
+| **#7** | Sprint 2 (Week 3-4) | `Member A` | `Member B` | 4h | #1 | [S2][A] 优化 Inference API 容器：多阶段构建 (<300MB) + `/ready` + 推理监控指标 |
+| **#8** | Sprint 2 (Week 3-4) | `Member A` | `Member B` | 4h | #7 | [S2][A] 搭建 GitHub Actions CI 流水线（Lint + Unit/Consistency Test + Docker Build） |
+| **#9** | Sprint 2 (Week 3-4) | `Member A` | `Member B` | 3h | #11 | [S2][A] 推论 API 性能压测与证据报告 #2：`docs/evidence/02_load_test.md` |
+| **#10** | Sprint 2 (Week 3-4) | `Member B` | `Member A` | 5h | #5 | [S2][B] 实现模型质量门禁（Quality Gate）与 MLflow Model Registry `@challenger` -> `@champion` 自动晋升 |
+| **#11** | Sprint 2 (Week 3-4) | `Member B` | `Member A` | 5h | #10 | [S2][B] 改造 Inference API：实现 `MLflowChampionDetector` 加载线上模型并返回 Top-3 异常特征 |
+| **#12** | Sprint 2 (Week 3-4) | `Member B` | `Member A` | 3h | #4, #11 | [S2][B] 编写 Train-Serving 一致性测试（防止训练与推理特征偏差） |
+| **#13** | Sprint 3 (Week 5-6) | `Member A` | `Member B` | 6h | #7, #8 | [S3][A] Terraform 编排省钱版 AWS 推论底座（S3 + ECR + IAM + ECS Fargate，无 NAT） |
+| **#14** | Sprint 3 (Week 5-6) | `Member A` | `Member B` | 5h | #13 | [S3][A] 搭建 AWS CD 自动部署流水线与 Grafana 监控大盘 |
+| **#15** | Sprint 3 (Week 5-6) | `Member A` | `Member B` | 4h | #11, #14 | [S3][A] 实现模型一键回滚脚本与手动回滚 Workflow（RTO < 3 分钟） |
+| **#16** | Sprint 3 (Week 5-6) | `Member B` | `Member A` | 5h | #3, #5 | [S3][B] 接入 Evidently 实现输入特征与预测分布漂移监控 |
+| **#17** | Sprint 3 (Week 5-6) | `Both` | `Tech Lead` | 5h | #15, #16 | [S3][Both] 联调「漂移告警 -> 人工审批再训练 -> 上线」及「坏模型回滚」完整演练并存档证据 #3 |
+| **#18** | Sprint 4 (Week 7-8) | `Member B` | `Member A` | 6h | #11 | [S4][B] 开发 SRE Triage AI Agent：检索日语 Runbook 生成故障一次分析报告 |
+| **#19** | Sprint 4 (Week 7-8) | `Member B` | `Member A` | 4h | #18 | [S4][B] 接入 Langfuse Cloud 追踪与 Agent 离线评估报告 #4：`docs/evidence/04_agent_eval.md` |
+| **#20** | Sprint 4 (Week 7-8) | `Member A` | `Member B` | 4h | #14, #15 | [S4][A] 安全检查（密钥/IAM/tfsec）与日语《運用手順書》完稿 |
+| **#21** | Sprint 4 (Week 7-8) | `Both` | `Tech Lead` | 4h | #10, #11 | [S4][Optional] 制造业设备予知保全模块（UCI AI4I 2020）：验证 MLOps 平台跨场景复用 |
+
+---
+
+## Sprint 0 (Week 0)
+
+### Issue #0: [S0][Joint] 初始化 GitHub 仓库、分支保护与在线看板，跑通 v0.1 缺陷复现
+- **Owner**: `Both` | **Reviewer**: `Tech Lead` | **目安工数**: 2h | **優先度**: Highest | **依存**: なし
+- **目的（Goal）**: 两人各自用 Mac 通过 SSH 连上局域网 Linux 开发机，将 v0.1 代码推上 GitHub，激活在线看板，并在各自独立目录跑通基线测试与故障注入演示。
+- **対象ファイル**: `.env.example`, `docs/00_onboarding.md`, `docs/04_lan_dev_server_setup.md`
+- **実装ステップ（具体作業）**:
+  1. 成员 A 与成员 B 各自在 Mac 上执行 ssh-copy-id 连上 192.168.0.253（jintao / xinchen）。
+  2. 成员 A 在 GitHub 新建私有/公开仓库 opspulse-mlops，初始化本地 Git 并推送 main 分支；开启 main 分支保护（Require PR before merging）。
+  3. 成员 B 登录 xinchen 账号，在 /home/xinchen/opspulse-mlops 独立 git clone 一份代码并配置好 python .venv。
+  4. 使用 scripts/bootstrap_github_board.py（或导入 docs/jira_backlog_import.csv）将 22 张任务卡同步到在线看板。
+  5. 两人在本地分别执行 make lint && make test && make eval-baseline，并用 fault_injector.py 亲眼观察静态阈值的误报（traffic_surge_normal）和漏报（memory_leak）。
+- **動作確認コマンド**: `make lint && make test && make eval-baseline`
+- **完了条件（Definition of Done）**:
+  - [ ] 两台 Mac 均可免密 SSH 并用 Remote-SSH 打开各自独立代码目录
+  - [ ] GitHub main 分支已受保护，22 个任务已出现在在线看板
+  - [ ] 两人均复现过静态规则的误报与漏报输出
+
+## Sprint 1 (Week 1-2)
+
+### Issue #1: [S1][A] 扩展 Docker Compose：接入 PostgreSQL + MinIO（自动建桶）+ MLflow Server
+- **Owner**: `Member A` | **Reviewer**: `Member B` | **目安工数**: 4h | **優先度**: Highest | **依存**: #0
+- **目的（Goal）**: 补齐本地 MLOps 基础设施（与未来 AWS RDS/S3 保持架构一致），让团队可通过 localhost:5000 访问 MLflow UI、localhost:9001 访问 MinIO Console。
+- **対象ファイル**: `docker-compose.yml`, `infra/docker/mlflow.Dockerfile`, `.env.example`
+- **実装ステップ（具体作業）**:
+  1. 新建 infra/docker/mlflow.Dockerfile，基于 ghcr.io/mlflow/mlflow:v2.16.2 安装 psycopg2-binary 和 boto3（官方镜像默认缺这两个包）。
+  2. 在 docker-compose.yml 中新增 postgres:16-alpine（挂载命名卷 pg_data）和 minio/minio（挂载命名卷 minio_data，暴露 9000/9001）。
+  3. 新增一次性 init 容器 minio-init（使用 minio/mc），启动后自动创建 opspulse-data 与 mlflow-artifacts 两个 Bucket。
+  4. 新增 mlflow 服务，配置 --backend-store-uri postgresql://...、--default-artifact-root s3://mlflow-artifacts/ 及 MLFLOW_S3_ENDPOINT_URL=http://minio:9000。
+  5. 确认挂载健康检查（depends_on condition: service_healthy），确保 make up 一键全部变绿。
+- **動作確認コマンド**: `docker compose up -d --build && docker compose ps && curl -sf http://localhost:5000/health`
+- **完了条件（Definition of Done）**:
+  - [ ] Mac 浏览器可打开 http://192.168.0.253:5000 (MLflow) 与 :9001 (MinIO)
+  - [ ] MinIO 中自动存在 opspulse-data 与 mlflow-artifacts 两个 Bucket
+  - [ ] 重启容器（docker compose restart）后实验与数据不丢失
+
+### Issue #2: [S1][A] 开发 ETL 采集器：抽取 target_app 指标并写 Parquet 到 MinIO/S3
+- **Owner**: `Member A` | **Reviewer**: `Member B` | **目安工数**: 5h | **優先度**: High | **依存**: #1
+- **目的（Goal）**: 打通数据采集流水线，将模拟业务系统的遥测快照与故障标签校验后按日期分区写入 MinIO（未来切 AWS S3 零改动）。
+- **対象ファイル**: `services/etl_collector/collector.py`, `services/etl_collector/__init__.py`, `tests/test_etl_collector.py`
+- **実装ステップ（具体作業）**:
+  1. 在 services/etl_collector/collector.py 中实现采集循环：调用 target_app 的 /admin/telemetry（以及可选 Prometheus /api/v1/query）。
+  2. 每条采样必须经过 opspulse_core.schemas.MetricWindowInput 校验，并保留 scenario、is_fault 标签及采集时间戳。
+  3. 将缓冲批次转为 Pandas DataFrame，使用 PyArrow 写为 Parquet 字节流。
+  4. 通过 boto3（读取 S3_ENDPOINT_URL 环境变量）上传到 s3://opspulse-data/raw/dt=YYYY-MM-DD/batch_<ts>.parquet。
+  5. 编写单测 tests/test_etl_collector.py（使用 mock/内存验证 Parquet 列结构与 S3 key 格式）。
+- **動作確認コマンド**: `PYTHONPATH=packages:. pytest tests/test_etl_collector.py`
+- **完了条件（Definition of Done）**:
+  - [ ] collector.py 能把至少 1 批带标签 Parquet 成功写入 MinIO opspulse-data
+  - [ ] 未设置 S3_ENDPOINT_URL 时默认直连 AWS S3，设置时连 MinIO（Local-Cloud Parity）
+  - [ ] 单元测试全部通过且符合 ruff 规范
+
+### Issue #3: [S1][A] 制作可复现数据集生成命令 `make data-collect`（>=3,000 条 5 场景混合样本）
+- **Owner**: `Member A` | **Reviewer**: `Member B` | **目安工数**: 3h | **優先度**: High | **依存**: #2
+- **目的（Goal）**: 为成员 B 提供一键可复现的标准训练/验证数据集生成流程，避免手工操作导致样本不均衡。
+- **対象ファイル**: `scripts/generate_dataset.py`, `Makefile`
+- **実装ステップ（具体作業）**:
+  1. 编写 scripts/generate_dataset.py，按比例编排 5 个场景（例如 normal 40%、traffic_surge_normal 20%、memory_leak 15%、db_pool_exhaustion 15%、downstream_timeout 10%）。
+  2. 支持 --output-mode local|s3，将 train.parquet（3,000+ 行）和 test.parquet（1,000+ 行，时间切分防数据泄露）写入 MinIO。
+  3. 在 Makefile 中新增 data-collect 目标，打印各场景行数分布与正负样本比例。
+- **動作確認コマンド**: `make data-collect`
+- **完了条件（Definition of Done）**:
+  - [ ] 执行 make data-collect 后在 MinIO 中看到 train.parquet 与 test.parquet
+  - [ ] 总样本数 >= 3,000，包含全部 5 种 FaultScenario，无 NaN 缺失值
+
+### Issue #4: [S1][B] 完善 `opspulse_core`：接入 Pandera 批处理数据契约与高区分度特征
+- **Owner**: `Member B` | **Reviewer**: `Member A` | **目安工数**: 4h | **優先度**: Highest | **依存**: #0
+- **目的（Goal）**: 补齐批量 DataFrame 级别的数据质量门禁（Pandera），并设计能够区分「正常促销高 CPU」与「真实故障/内存泄漏」的共享特征。
+- **対象ファイル**: `packages/opspulse_core/features.py`, `packages/opspulse_core/contracts.py`, `tests/test_core_schemas.py`
+- **実装ステップ（具体作業）**:
+  1. 在 packages/opspulse_core/contracts.py 中定义 Pandera DataFrameSchema，校验列类型、数值范围（cpu 0-100、error_rate 0-1、p95 >= 0）和非空约束。
+  2. 在 packages/opspulse_core/features.py 中新增至少 2 个高区分度特征，例如 rps_per_cpu（正常大促高 RPS 且高 CPU 比值高，DB 故障低）和 mem_leak_pressure（memory_percent * max(memory_slope_per_min, 0)）。
+  3. 提供批处理转换函数 extract_features_df(df) 确保内部直接复用单条 extract_features() 逻辑。
+  4. 在 tests/test_core_schemas.py 补充脏数据拦截测试（负延迟、超界 CPU 必须抛出 SchemaError）。
+- **動作確認コマンド**: `make lint && make test`
+- **完了条件（Definition of Done）**:
+  - [ ] Pandera 能拦截脏 DataFrame 并通过合法数据
+  - [ ] 单条特征与批量 DataFrame 特征计算共用同一函数且单测全绿
+
+### Issue #5: [S1][B] 搭建训练对比流水线：`Static` vs `IsolationForest` vs `LightGBM` 接入 MLflow
+- **Owner**: `Member B` | **Reviewer**: `Member A` | **目安工数**: 6h | **優先度**: Highest | **依存**: #1, #3, #4
+- **目的（Goal）**: 完成首个超越静态规则基线的 ML 模型训练脚本，并将所有超参数、指标、混淆矩阵图、特征重要度统一记入 MLflow。
+- **対象ファイル**: `pipelines/training/train.py`, `Makefile`, `pyproject.toml`
+- **実装ステップ（具体作業）**:
+  1. 安装 ml 依赖组（uv pip install -e '.[dev,ml]' 或 pip install）。
+  2. 在 pipelines/training/train.py 中从 MinIO (s3://opspulse-data/) 读取 train.parquet 与 test.parquet，先用 Pandera 校验。
+  3. 在同一验证集上分别评估 StaticThresholdDetector（基线）、IsolationForest（无监督）与 LightGBM（有监督）。
+  4. 使用 MLflow Tracking 记录每次实验的参数、Precision、Recall、F1、FPR（误报率）、P95 推理耗时，并上传混淆矩阵 PNG 与特征重要度图作为 Artifact。
+- **動作確認コマンド**: `PYTHONPATH=packages:. python pipelines/training/train.py`
+- **完了条件（Definition of Done）**:
+  - [ ] MLflow UI (http://192.168.0.253:5000) 可见至少 3 组对比 Run 记录与图片 Artifact
+  - [ ] LightGBM 相对静态基线：FPR（误报率）下降 >= 50%，memory_leak 召回率 >= 85%
+
+### Issue #6: [S1][B] 产出证据报告 #1：`docs/evidence/01_model_vs_baseline.md`
+- **Owner**: `Member B` | **Reviewer**: `Member A` | **目安工数**: 2h | **優先度**: Medium | **依存**: #5
+- **目的（Goal）**: 将 Sprint 1 的真实实验对比数据沉淀为日语/双语技术报告，作为日后日本面试官考察模型效果的核心证据。
+- **対象ファイル**: `docs/evidence/01_model_vs_baseline.md`
+- **実装ステップ（具体作業）**:
+  1. 整理 StaticThreshold vs IsolationForest vs LightGBM 的指标对比表（Precision / Recall / F1 / FPR / 场景分项准确率）。
+  2. 附上特征重要度分析（说明为什么 memory_slope_per_min 与 latency_per_cpu 能捕获早期内存泄漏与 DB 阻塞）。
+  3. 附上可复现运行命令和 MLflow 实验截图路径。
+- **動作確認コマンド**: `cat docs/evidence/01_model_vs_baseline.md`
+- **完了条件（Definition of Done）**:
+  - [ ] 报告内所有数字与 MLflow UI 实测完全一致，无编造数字
+  - [ ] 经过成员 A Review 后合并进 main
+
+## Sprint 2 (Week 3-4)
+
+### Issue #7: [S2][A] 优化 Inference API 容器：多阶段构建 (<300MB) + `/ready` + 推理监控指标
+- **Owner**: `Member A` | **Reviewer**: `Member B` | **目安工数**: 4h | **優先度**: High | **依存**: #1
+- **目的（Goal）**: 将 PoC Dockerfile 升级为符合企业安全与体积规范的生产镜像，并补齐 K8s/ECS 所需的健康探针与模型版本监控标签。
+- **対象ファイル**: `services/inference_api/Dockerfile`, `services/inference_api/app.py`
+- **実装ステップ（具体作業）**:
+  1. 改造 services/inference_api/Dockerfile 为 multi-stage build，最终镜像仅保留运行时依赖并使用非 root 用户（appuser）运行。
+  2. 在 services/inference_api/app.py 新增 GET /ready 接口（确认模型已成功加载才返回 200，否则返回 503）。
+  3. 在 Prometheus /metrics 中暴露带 model_version 与 model_alias 标签的推理延迟和异常率指标。
+  4. 检查镜像体积确保 < 300MB（若 LightGBM/MLflow 依赖偏大，精简不必要构建工具并记录实际体积）。
+- **動作確認コマンド**: `docker build -f services/inference_api/Dockerfile -t opspulse-inference:test . && docker images opspulse-inference:test`
+- **完了条件（Definition of Done）**:
+  - [ ] 容器以非 root 用户运行（docker run ... id 验证非 uid=0）
+  - [ ] /health、/ready、/model-info、/metrics 全部正常响应
+
+### Issue #8: [S2][A] 搭建 GitHub Actions CI 流水线（Lint + Unit/Consistency Test + Docker Build）
+- **Owner**: `Member A` | **Reviewer**: `Member B` | **目安工数**: 4h | **優先度**: Highest | **依存**: #7
+- **目的（Goal）**: 建立自动化代码质量门禁，任何 PR 在合并进 main 前必须自动通过 Lint、测试和容器构建检查。
+- **対象ファイル**: `.github/workflows/ci.yml`
+- **実装ステップ（具体作業）**:
+  1. 新建 .github/workflows/ci.yml，触发条件设为 pull_request (main) 与 push (main)。
+  2. Job 1 (lint-and-test)：配置 Python 3.12 + uv 缓存，执行 ruff check 与 pytest（含 Train-Serving 一致性测试）。
+  3. Job 2 (docker-build)：使用 docker/setup-buildx-action 构建 target_app 与 inference_api 镜像验证不报错。
+  4. 在 GitHub 仓库 Settings -> Branches 将 CI checks 设为 Require status checks to pass before merging。
+- **動作確認コマンド**: `gh pr checks || echo 'Push a test PR and verify green check on GitHub Actions'`
+- **完了条件（Definition of Done）**:
+  - [ ] 发起 PR 后自动触发 CI 并全部变绿
+  - [ ] 故意提交一个 ruff 格式错误能被 CI 成功拦截
+
+### Issue #9: [S2][A] 推论 API 性能压测与证据报告 #2：`docs/evidence/02_load_test.md`
+- **Owner**: `Member A` | **Reviewer**: `Member B` | **目安工数**: 3h | **優先度**: Medium | **依存**: #11
+- **目的（Goal）**: 实测接入 MLflow Champion 模型后的 FastAPI 推论服务并发能力与 P95 延迟，验证是否满足 SLO (<50ms)。
+- **対象ファイル**: `scripts/load_test.py`, `docs/evidence/02_load_test.md`
+- **実装ステップ（具体作業）**:
+  1. 编写轻量压测脚本 scripts/load_test.py（可用 Locust 或基于 asyncio/httpx 的并发压测脚本）。
+  2. 针对容器化后的 inference_api 压测至少 2 分钟（分别测试 10 / 50 / 100 并发）。
+  3. 记录 QPS、P50/P95/P99 延迟、错误率及 docker stats CPU/内存占用，写入 docs/evidence/02_load_test.md。
+- **動作確認コマンド**: `PYTHONPATH=packages:. python scripts/load_test.py --concurrency 50 --duration 30`
+- **完了条件（Definition of Done）**:
+  - [ ] 50 并发下错误率为 0% 且 P95 延迟 < 50ms
+  - [ ] 压测数据与运行命令完整记录在 docs/evidence/02_load_test.md
+
+### Issue #10: [S2][B] 实现模型质量门禁（Quality Gate）与 MLflow Model Registry `@challenger` -> `@champion` 自动晋升
+- **Owner**: `Member B` | **Reviewer**: `Member A` | **目安工数**: 5h | **優先度**: Highest | **依存**: #5
+- **目的（Goal）**: 建立防止劣质模型污染生产环境的自动化评估门禁，采用 MLflow 最新 Model Aliases 规范管理版本晋升。
+- **対象ファイル**: `pipelines/training/train.py`, `pipelines/training/quality_gate.py`, `tests/test_quality_gate.py`
+- **実装ステップ（具体作業）**:
+  1. 在 pipelines/training/quality_gate.py 定义门禁函数：对比候选模型与当前 @champion（若无则与静态基线对比），要求 F1 >= 基线且 >= 0.88、FPR <= 0.08、单条推理 < 15ms。
+  2. 训练完成后自动注册模型到 opspulse-anomaly-detector 并打标 alias @challenger，同时记录 git_commit、dataset_uri 等 Tags。
+  3. 仅当通过质量门禁时，调用 MlflowClient().set_registered_model_alias(..., 'champion', version) 完成晋升；未通过则保留原 @champion 并退出非零状态或输出拒絶报告。
+  4. 编写 tests/test_quality_gate.py 测试通过与拦截两种分支。
+- **動作確認コマンド**: `PYTHONPATH=packages:. pytest tests/test_quality_gate.py`
+- **完了条件（Definition of Done）**:
+  - [ ] MLflow Models 页面可见版本历史与 @champion / @challenger 标签
+  - [ ] 刻意降低模型质量时门禁能阻断 @champion 晋升
+
+### Issue #11: [S2][B] 改造 Inference API：实现 `MLflowChampionDetector` 加载线上模型并返回 Top-3 异常特征
+- **Owner**: `Member B` | **Reviewer**: `Member A` | **目安工数**: 5h | **優先度**: Highest | **依存**: #10
+- **目的（Goal）**: 正式下线静态阈值规则，让线上推理 API 动态拉取 MLflow @champion 模型并提供可解释的故障原因字段。
+- **対象ファイル**: `services/inference_api/detector.py`, `services/inference_api/app.py`
+- **実装ステップ（具体作業）**:
+  1. 在 services/inference_api/detector.py 补全 MLflowChampionDetector.__init__：连接 MLFLOW_TRACKING_URI，通过 MlflowClient 解析 @champion 对应的真实版本号与 artifact 模型。
+  2. 实现 predict()：调用 opspulse_core.features.extract_features(payload) 计算特征，执行模型预测概率并映射 normal / warning / critical 严重级别。
+  3. 结合特征偏离度或 LightGBM 特征贡献输出 triggered_reasons（例如 Top-3 异常贡献特征与当前值），为 Sprint 4 AI Agent 提供线索。
+  4. 在 .env 与 docker-compose.yml 中将 DETECTOR_BACKEND 切换为 mlflow_champion 并联调 /predict 与 /model-info。
+- **動作確認コマンド**: `curl -s http://localhost:8002/model-info && make inject-drift && make inject-memleak`
+- **完了条件（Definition of Done）**:
+  - [ ] /model-info 返回 backend='mlflow_champion' 与具体版本号
+  - [ ] inject-drift 误报大幅下降，inject-memleak 在早期即被检出
+
+### Issue #12: [S2][B] 编写 Train-Serving 一致性测试（防止训练与推理特征偏差）
+- **Owner**: `Member B` | **Reviewer**: `Member A` | **目安工数**: 3h | **優先度**: High | **依存**: #4, #11
+- **目的（Goal）**: 通过自动化测试锁死 MLOps 最常见的线上事故源（Train-Serving Skew），确保 CI 每次变更都能校验一致性。
+- **対象ファイル**: `tests/test_train_serving_consistency.py`
+- **実装ステップ（具体作業）**:
+  1. 构建一组覆盖 5 种场景边界值的固定测试样本。
+  2. 分别通过训练管道使用的 DataFrame 批特征接口和 Inference API 的 /predict 特征路径计算特征向量。
+  3. 断言每一列特征的数值差异绝对值 < 1e-6，且列顺序与 FEATURE_NAMES 完全一致。
+- **動作確認コマンド**: `PYTHONPATH=packages:. pytest tests/test_train_serving_consistency.py`
+- **完了条件（Definition of Done）**:
+  - [ ] 测试被纳入 CI 自动执行，误差严格 < 1e-6
+
+## Sprint 3 (Week 5-6)
+
+### Issue #13: [S3][A] Terraform 编排省钱版 AWS 推论底座（S3 + ECR + IAM + ECS Fargate，无 NAT）
+- **Owner**: `Member A` | **Reviewer**: `Member B` | **目安工数**: 6h | **優先度**: Highest | **依存**: #7, #8
+- **目的（Goal）**: 用 IaC 在 AWS ap-northeast-1（东京区）一键拉起可运行的推论容器底座，并实现用完一键销毁控费（演练费 <$5）。
+- **対象ファイル**: `infra/terraform/main.tf`, `infra/terraform/variables.tf`, `infra/terraform/outputs.tf`, `infra/terraform/ecs.tf`, `infra/terraform/iam.tf`, `Makefile`
+- **実装ステップ（具体作業）**:
+  1. 使用 Terraform 编写 VPC/公有子网（省去昂贵 NAT Gateway）与最小开放端口 Security Group（仅放行 8002/你的 IP）。
+  2. 定义 S3 Bucket（数据/模型产物）、ECR Repository（opspulse-inference）、CloudWatch Log Group、最小权限 IAM Task Execution Role & Task Role（仅允许读指定 S3 Bucket）。
+  3. 定义 ECS Fargate Cluster、Task Definition（0.25 vCPU / 0.5 GB 省钱规格）与 Service（assign_public_ip = true）。
+  4. 在 Makefile 新增 make aws-plan / make aws-up / make aws-down，并在本地验证 terraform validate && terraform plan。
+- **動作確認コマンド**: `cd infra/terraform && terraform init -backend=false && terraform validate`
+- **完了条件（Definition of Done）**:
+  - [ ] terraform apply 成功并在 AWS 东京区拉起 ECS Fargate 任务
+  - [ ] 可通过公网 IP:8002/model-info 访问云端推理服务
+  - [ ] terraform destroy 能干净清理全部计费资源无残留
+
+### Issue #14: [S3][A] 搭建 AWS CD 自动部署流水线与 Grafana 监控大盘
+- **Owner**: `Member A` | **Reviewer**: `Member B` | **目安工数**: 5h | **優先度**: High | **依存**: #13
+- **目的（Goal）**: 实现合入 main 自动推 ECR 更新 ECS + Smoke Test，并在本地 7x24 Grafana 大盘中实时监控业务/推理指标与告警。
+- **対象ファイル**: `.github/workflows/cd-ecs.yml`, `docker-compose.yml`, `monitoring/grafana/dashboards/opspulse_overview.json`, `monitoring/prometheus/alert_rules.yml`
+- **実装ステップ（具体作業）**:
+  1. 编写 .github/workflows/cd-ecs.yml（建议配合 GitHub OIDC 或最小权限 IAM Key）：构建推 ECR -> 注册新 Task Revision -> 更新 ECS Service -> curl /health 与 /model-info 做 Smoke Test。
+  2. 在 docker-compose.yml 新增 grafana 服务（:3000），配置 Prometheus 数据源自动挂载。
+  3. 搭建 Grafana 面板（业务指标、P95 推论延迟、异常检出率、当前模型版本），导出 JSON 到 monitoring/grafana/dashboards/。
+  4. 在 monitoring/prometheus/alert_rules.yml 增加高异常率与推论高延迟告警规则。
+- **動作確認コマンド**: `docker compose up -d grafana && curl -sf http://localhost:3000/api/health`
+- **完了条件（Definition of Done）**:
+  - [ ] merge 到 main 后自动将镜像更新至 AWS ECS 并通过 Smoke Test
+  - [ ] Mac 浏览器可访问 http://192.168.0.253:3000 查看完整实时大盘
+
+### Issue #15: [S3][A] 实现模型一键回滚脚本与手动回滚 Workflow（RTO < 3 分钟）
+- **Owner**: `Member A` | **Reviewer**: `Member B` | **目安工数**: 4h | **優先度**: Highest | **依存**: #11, #14
+- **目的（Goal）**: 当线上新模型出现误报激增或异常退化时，能用一条命令或按钮在一分钟内将 @champion 切回指定历史稳定版本并恢复服务。
+- **対象ファイル**: `scripts/rollback_model.py`, `.github/workflows/rollback.yml`, `Makefile`
+- **実装ステップ（具体作業）**:
+  1. 编写 scripts/rollback_model.py：接受 --target-version（未传则自动回退到上一个可用历史版本），校验目标版本存在后将 MLflow @champion 别名切回该版本并写入审计 Tag。
+  2. 支持触发推理服务重启或调用热加载端点，验证 /model-info 返回的版本号已切回旧版。
+  3. 在 Makefile 新增 make rollback VERSION=...，并配置 .github/workflows/rollback.yml (workflow_dispatch 手动触发)。
+- **動作確認コマンド**: `PYTHONPATH=packages:. python scripts/rollback_model.py --dry-run`
+- **完了条件（Definition of Done）**:
+  - [ ] 真实演练切回旧版，从执行命令到 /model-info 生效恢复耗时 < 3 分钟
+
+### Issue #16: [S3][B] 接入 Evidently 实现输入特征与预测分布漂移监控
+- **Owner**: `Member B` | **Reviewer**: `Member A` | **目安工数**: 5h | **優先度**: Highest | **依存**: #3, #5
+- **目的（Goal）**: 定期比对线上新采集窗口数据与训练基线分布，定量识别 Data Drift（如业务量级翻倍或特征偏移）并生成可视化 HTML 报告。
+- **対象ファイル**: `pipelines/monitoring/drift_check.py`, `tests/test_drift_check.py`
+- **実装ステップ（具体作業）**:
+  1. 在 pipelines/monitoring/drift_check.py 中加载参考数据集（reference: train.parquet）与近期线上采集窗口数据（current）。
+  2. 使用 Evidently DataDriftPreset 计算各特征漂移状态与全集漂移比例（share_of_drifted_columns）。
+  3. 同时输出可视化 HTML 报告与结构化 JSON 摘要（含 drifted_features 列表与是否超出阈值 drift_detected: bool），并上传至 MinIO/S3。
+  4. 编写单测 tests/test_drift_check.py：验证同分布返回 False，注入流量偏移后准确返回 True。
+- **動作確認コマンド**: `PYTHONPATH=packages:. pytest tests/test_drift_check.py`
+- **完了条件（Definition of Done）**:
+  - [ ] 能产出直观的 Evidently HTML 漂移报告并存入 MinIO/S3
+  - [ ] 注入分布漂移后准确触发 drift_detected=true
+
+### Issue #17: [S3][Both] 联调「漂移告警 -> 人工审批再训练 -> 上线」及「坏模型回滚」完整演练并存档证据 #3
+- **Owner**: `Both` | **Reviewer**: `Tech Lead` | **目安工数**: 5h | **優先度**: Highest | **依存**: #15, #16
+- **目的（Goal）**: 打通 MLOps 最核心的生命周期闭环（Human-in-the-Loop 再训练 + 故障回滚演练），并沉淀可向面试官展示的全套时间线证据。
+- **対象ファイル**: `.github/workflows/retrain-hitl.yml`, `docs/evidence/03_drift_and_rollback.md`
+- **実装ステップ（具体作業）**:
+  1. 编写 .github/workflows/retrain-hitl.yml：Step 1 跑漂移检测并在超阈值时使用 incident_report 模板自动创建 GitHub Issue；Step 2 通过 GitHub Environment (production-approval) 暂停等待人工点击 Approve；Step 3 批准后自动触发重训与质量门禁晋升。
+  2. 共同执行演练 A：注入分布偏移 -> 看到漂移报告与自动 Issue -> 人工审批 -> 新模型自动晋升。
+  3. 共同执行演练 B：故意注册一个低准确率坏模型为 @champion -> 触发异常 -> 执行回滚脚本在 1 分钟内切回稳定版本。
+  4. 将两场演练的截图、时间戳、终端日志整理写入 docs/evidence/03_drift_and_rollback.md。
+- **動作確認コマンド**: `cat docs/evidence/03_drift_and_rollback.md`
+- **完了条件（Definition of Done）**:
+  - [ ] 真实跑通一次 HITL 审批再训练
+  - [ ] 真实跑通一次坏模型回滚，且全程耗时与恢复证据记录完备
+
+## Sprint 4 (Week 7-8)
+
+### Issue #18: [S4][B] 开发 SRE Triage AI Agent：检索日语 Runbook 生成故障一次分析报告
+- **Owner**: `Member B` | **Reviewer**: `Member A` | **目安工数**: 6h | **優先度**: Highest | **依存**: #11
+- **目的（Goal）**: 在 ML 检出异常后，由 AI Agent 结合指标快照、Top-3 异常特征、最近错误日志与日语运维手册自动输出结构化一次定位报告，缩短 MTTR。
+- **対象ファイル**: `services/triage_agent/rag.py`, `services/triage_agent/agent.py`, `services/triage_agent/app.py`, `tests/test_triage_agent.py`
+- **実装ステップ（具体作業）**:
+  1. 在 services/triage_agent/rag.py 中实现轻量检索器：切分 knowledge_base/runbooks/*.md（4 篇日语手順書），支持向量或混合关键词检索返回最相关 Runbook 片段与文件名引用。
+  2. 在 agent.py 中构建结构化输出模型（推定原因、該当Runbook番号、根拠メトリクス/ログ、一次確認コマンド、初動復旧手順），严格要求所有命令必须出自检索到的 Runbook，严禁瞎编。
+  3. 支持通过 LLM_PROVIDER=gemini|openai|ollama 切换模型后端，并暴露 POST /triage 接口（或 CLI 工具）。
+  4. 编写 tests/test_triage_agent.py（Mock LLM 响应），保证在 CI 无外网/无 Key 时也能稳定跑通单测。
+- **動作確認コマンド**: `PYTHONPATH=packages:. pytest tests/test_triage_agent.py`
+- **完了条件（Definition of Done）**:
+  - [ ] 输入 4 种典型场景快照均能检索到对应 RB-001~RB-004 并输出专业日语一次分析报告
+  - [ ] 无直接依据时能明确输出「根拠不足・要確認」而不产生幻觉命令
+
+### Issue #19: [S4][B] 接入 Langfuse Cloud 追踪与 Agent 离线评估报告 #4：`docs/evidence/04_agent_eval.md`
+- **Owner**: `Member B` | **Reviewer**: `Member A` | **目安工数**: 4h | **優先度**: High | **依存**: #18
+- **目的（Goal）**: 建立 LLMOps 可观测性与量化评估体系，证明 AI Agent 在企业运维中的可靠性而非盲目调 Prompt。
+- **対象ファイル**: `services/triage_agent/eval.py`, `knowledge_base/eval_dataset.jsonl`, `docs/evidence/04_agent_eval.md`
+- **実装ステップ（具体作業）**:
+  1. 在 services/triage_agent/agent.py 接入 Langfuse Cloud SDK（使用免费云端账号，避免本地起 ClickHouse 拖垮机器），记录每次检索片段、Prompt、耗时与 Token 消耗。
+  2. 准备 15-20 条涵盖不同故障与边界干扰样本的评估集 knowledge_base/eval_dataset.jsonl。
+  3. 编写 eval.py 跑通离线评估，统计 Runbook 引用准确率（Citation Accuracy）、Root Cause 命中率、平均响应延迟与 P95 Token 成本。
+  4. 将评估结果与 Langfuse Trace 截图记录到 docs/evidence/04_agent_eval.md。
+- **動作確認コマンド**: `PYTHONPATH=packages:. python services/triage_agent/eval.py`
+- **完了条件（Definition of Done）**:
+  - [ ] Langfuse Cloud 面板可见完整 Trace 与 Span 链路
+  - [ ] 评估集 Runbook 命中率 >= 90%，所有实测指标写入证据报告
+
+### Issue #20: [S4][A] 安全检查（密钥/IAM/tfsec）与日语《運用手順書》完稿
+- **Owner**: `Member A` | **Reviewer**: `Member B` | **目安工数**: 4h | **優先度**: High | **依存**: #14, #15
+- **目的（Goal）**: 补齐企业级项目交付最看重的安全基线审计与日语运维交付文档，确保仓库对外展示（开源或给面试官看）零敏感信息泄露。
+- **対象ファイル**: `.github/workflows/ci.yml`, `docs/03_runbook_ops.md`
+- **実装ステップ（具体作業）**:
+  1. 在本地与 CI 中运行 gitleaks（或 trufflehog）检查全提交历史无任何 API Key / AWS Secret；对 infra/terraform/ 运行 tfsec 静态安全扫描并修复高危告警。
+  2. 审计 AWS IAM Role 权限，确保严格遵循最小权限原则并记录在文档中。
+  3. 编写日语企业级《運用手順書 (docs/03_runbook_ops.md)》：覆盖日常监控确认、モデル再学習手順、障害時緊急ロールバック手順、AWS コスト管理と停止手順。
+- **動作確認コマンド**: `gitleaks detect --source . -v || echo 'Check gitleaks installation'`
+- **完了条件（Definition of Done）**:
+  - [ ] 全仓历史密钥扫描 0 泄漏
+  - [ ] docs/03_runbook_ops.md 结构完整且经过双人交叉模拟演练
+
+### Issue #21: [S4][Optional] 制造业设备予知保全模块（UCI AI4I 2020）：验证 MLOps 平台跨场景复用
+- **Owner**: `Both` | **Reviewer**: `Tech Lead` | **目安工数**: 4h | **優先度**: Low | **依存**: #10, #11
+- **目的（Goal）**: （可选加分项）不改底层 MLflow/CI/CD/Docker 底座，仅新增制造业设备故障数据与训练脚本，证明这套 MLOps 平台可复用于日本制造业 IoT 场景。
+- **対象ファイル**: `pipelines/training/train_predictive_maintenance.py`, `docs/evidence/05_platform_reusability.md`
+- **実装ステップ（具体作業）**:
+  1. 下载 UCI AI4I 2020 Predictive Maintenance 合成数据集（10,000 条，文档中明确标注为合成公开数据集）。
+  2. 编写 train_predictive_maintenance.py，复用同一个 MLflow Registry 注册第二个模型（如 opspulse-ai4i-pdm）。
+  3. 记录复用同一套 MLOps 底座的耗时与结果到 docs/evidence/05_platform_reusability.md。
+- **動作確認コマンド**: `PYTHONPATH=packages:. python pipelines/training/train_predictive_maintenance.py`
+- **完了条件（Definition of Done）**:
+  - [ ] MLflow 中出现第二个业务模型且完整走通追踪与门禁流程
